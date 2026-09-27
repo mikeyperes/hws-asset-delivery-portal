@@ -3,7 +3,7 @@
  * Plugin Name: HWS Portal
  * Plugin URI: https://hexawebsystems.com
  * Description: Asset portal management system with email functionality, password protection, marketing templates, and Elementor integrations. Provides admin toggles for modular snippet activation.
- * Version: 1.7.5
+ * Version: 1.8.0
  * Author: Michael Peres - Hexa Web Systems
  * Author URI: https://michaelperes.com
  * Namespace: hws_portal
@@ -16,10 +16,21 @@ if (!defined('ABSPATH')) { exit; }
 // =============================================================================
 // PLUGIN CONSTANTS (static)
 // =============================================================================
-define('HWS_PORTAL_VERSION', '1.7.5');
+define('HWS_PORTAL_VERSION', '1.8.0');
 define('HWS_PORTAL_PATH', plugin_dir_path(__FILE__));
 define('HWS_PORTAL_URL', plugin_dir_url(__FILE__));
 define('HWS_PORTAL_OPTION_KEY', 'hws_portal_settings');
+
+// Hexa WP Core: custom fields run on ACF when it is active and natively when it is not.
+$hexa_plugin_core_root = HWS_PORTAL_PATH . 'lib/hexa-wordpress-plugin-core';
+require_once $hexa_plugin_core_root . '/bootstrap.php';
+\hexa_plugin_core_register_package(
+	'hws-asset-delivery-portal',
+	$hexa_plugin_core_root,
+	[
+		'minimum_version' => trim( (string) file_get_contents( $hexa_plugin_core_root . '/VERSION' ) ),
+	]
+);
 
 /**
  * ACF Options Page Slug.
@@ -341,17 +352,17 @@ function hws_portal_get_last_name(string $full_name): string {
  * Returns IDs in exact order as stored in theme options.
  */
 function hws_portal_get_default_marketing_template_ids(): array {
-	if (!function_exists('get_field')) return [];
+	if (!\Hexa\PluginCore\Fields\Field::available()) return [];
 
 	// Get raw value (unformatted) to preserve order
-	$defaults = get_field('default_marketing_templates', 'option', false);
+	$defaults = \Hexa\PluginCore\Fields\Field::get('default_marketing_templates', 'option', false);
 	
 	// Fallback to other option page slugs
 	if (empty($defaults)) {
-		$defaults = get_field('default_marketing_templates', 'option', false);
+		$defaults = \Hexa\PluginCore\Fields\Field::get('default_marketing_templates', 'option', false);
 	}
 	if (empty($defaults)) {
-		$defaults = get_field('default_marketing_templates', 'options', false);
+		$defaults = \Hexa\PluginCore\Fields\Field::get('default_marketing_templates', 'options', false);
 	}
 
 	if (empty($defaults)) return [];
@@ -419,8 +430,8 @@ function hws_portal_generate_password(int $post_id): bool {
 	$current_pw = '';
 	
 	// Try ACF first
-	if (function_exists('get_field')) {
-		$current_pw = \get_field('password', $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$current_pw = \Hexa\PluginCore\Fields\Field::get('password', $post_id);
 	}
 	
 	// Fallback to post meta
@@ -437,8 +448,8 @@ function hws_portal_generate_password(int $post_id): bool {
 	$new_pw = \wp_generate_password(12, false, false);
 	
 	// Save password (prefer ACF if available)
-	if (function_exists('update_field')) {
-		\update_field('password', $new_pw, $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		\Hexa\PluginCore\Fields\Field::update('password', $new_pw, $post_id);
 	} else {
 		\update_post_meta($post_id, 'password', $new_pw);
 	}
@@ -462,8 +473,8 @@ function hws_portal_generate_password(int $post_id): bool {
 function hws_portal_log_to_history(int $post_id, string $title, array $data = []): void {
 	// Get current history
 	$history = '';
-	if (function_exists('get_field')) {
-		$history = \get_field('history', $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$history = \Hexa\PluginCore\Fields\Field::get('history', $post_id);
 	}
 	if (!is_string($history)) {
 		$history = \get_post_meta($post_id, 'history', true);
@@ -486,8 +497,8 @@ function hws_portal_log_to_history(int $post_id, string $title, array $data = []
 	$new_history = $history ? ($history . "\n\n" . $log) : $log;
 	
 	// Save history (prefer ACF if available)
-	if (function_exists('update_field')) {
-		\update_field('history', $new_history, $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		\Hexa\PluginCore\Fields\Field::update('history', $new_history, $post_id);
 	} else {
 		\update_post_meta($post_id, 'history', $new_history);
 	}

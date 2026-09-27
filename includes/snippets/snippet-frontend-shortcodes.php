@@ -52,11 +52,11 @@ function hws_portal_process_content_shortcodes($content) {
 	$content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	
 	// Get ACF field values
-	$recipient = function_exists('get_field') ? \get_field('recipient', $post_id) : [];
-	$message = function_exists('get_field') ? \get_field('message', $post_id) : [];
-	$password = function_exists('get_field') ? \get_field('password', $post_id) : '';
-	$deliverables = function_exists('get_field') ? \get_field('delivertables', $post_id) : '';
-	$audit = function_exists('get_field') ? \get_field('audit', $post_id) : [];
+	$recipient = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('recipient', $post_id) : [];
+	$message = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('message', $post_id) : [];
+	$password = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('password', $post_id) : '';
+	$deliverables = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('delivertables', $post_id) : '';
+	$audit = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('audit', $post_id) : [];
 	
 	// Build recipient values
 	$recipient_name = '';
@@ -160,8 +160,8 @@ function hws_portal_process_content_shortcodes($content) {
 	$audit_ws_schema_example_url = '';
 	
 	// Get via ACF first
-	if (function_exists('get_field')) {
-		$email_templates = \get_field('email_templates', 'option');
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$email_templates = \Hexa\PluginCore\Fields\Field::get('email_templates', 'option');
 		if (is_array($email_templates) && isset($email_templates['audit']) && is_array($email_templates['audit'])) {
 			$audit_settings = $email_templates['audit'];
 			$audit_kp_example_image = $audit_settings['knowledge_panel_example_image'] ?? '';

@@ -17,10 +17,10 @@ if (!defined('ABSPATH')) { exit; }
  * Sets up the acf/init hook for options page registration.
  */
 function hws_portal_register_snippet_acf_options_page(): void {
-	\add_action('acf/init', __NAMESPACE__ . '\\hws_portal_register_acf_options_page');
+	\hexa_fields_on('init', __NAMESPACE__ . '\\hws_portal_register_acf_options_page');
 	
 	// Fix ACF nonce validation issues on options pages
-	\add_filter('acf/validate_save_post', __NAMESPACE__ . '\\hws_portal_fix_acf_nonce_validation', 5);
+	\hexa_fields_on('validate_save_post', __NAMESPACE__ . '\\hws_portal_fix_acf_nonce_validation', 5);
 }
 
 /**
@@ -60,11 +60,11 @@ function hws_portal_fix_acf_nonce_validation(): void {
  */
 function hws_portal_register_acf_options_page(): void {
 	// Bail if ACF Pro is not active
-	if (!function_exists('acf_add_options_page')) {
+	if (!\Hexa\PluginCore\Fields\Field::available()) {
 		return;
 	}
 	
-	\acf_add_options_page(array(
+	\Hexa\PluginCore\Fields\OptionsPages::add(array(
 		'page_title'      => 'Asset Portal Settings',
 		'menu_title'      => 'Asset Portal Settings',
 		'menu_slug'       => HWS_PORTAL_OPTIONS_SLUG,

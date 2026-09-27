@@ -50,13 +50,13 @@ function hws_portal_assets_shortcode_handler($atts): string {
 	$field = trim((string) $atts['field']);
 	if ($field === '') { return ''; }
 
-	if (!function_exists('get_field')) { return ''; }
+	if (!\Hexa\PluginCore\Fields\Field::available()) { return ''; }
 
 	$post_id = !empty($atts['post_id']) ? absint($atts['post_id']) : (int) \get_the_ID();
 	if (!$post_id) { return ''; }
 
 	// Get the ACF group data
-	$assets = get_field('assets', $post_id);
+	$assets = \Hexa\PluginCore\Fields\Field::get('assets', $post_id);
 	if (!is_array($assets) || empty($assets)) { return ''; }
 
 	// Normalize separators to underscores

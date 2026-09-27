@@ -168,8 +168,8 @@ function hws_portal_log_access(int $post_id, string $event_type, array $extra_da
  */
 function hws_portal_log_to_history_fallback(int $post_id, string $title, array $data = []): void {
 	$history = '';
-	if (function_exists('get_field')) {
-		$history = \get_field('history', $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$history = \Hexa\PluginCore\Fields\Field::get('history', $post_id);
 	}
 	if (!is_string($history)) {
 		$history = \get_post_meta($post_id, 'history', true);
@@ -189,8 +189,8 @@ function hws_portal_log_to_history_fallback(int $post_id, string $title, array $
 	
 	$new_history = $history ? ($history . "\n\n" . $log) : $log;
 	
-	if (function_exists('update_field')) {
-		\update_field('history', $new_history, $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		\Hexa\PluginCore\Fields\Field::update('history', $new_history, $post_id);
 	} else {
 		\update_post_meta($post_id, 'history', $new_history);
 	}
@@ -213,7 +213,7 @@ function hws_portal_send_login_notification_email(int $post_id, string $event_ty
 	$ip = $visitor['ip'];
 	
 	// Get email settings from theme options
-	$email_templates = function_exists('get_field') ? \get_field('email_templates', 'option') : [];
+	$email_templates = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get('email_templates', 'option') : [];
 	
 	// Get "from" email - use first from theme options or fallback to admin
 	$from = 'no-reply@' . wp_parse_url(home_url(), PHP_URL_HOST);
@@ -349,8 +349,8 @@ function hws_portal_protect_single_page_with_password() {
 	// Get the ACF password for this post
 	$stored_password = '';
 	
-	if (function_exists('get_field')) {
-		$stored_password = \get_field('password', $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$stored_password = \Hexa\PluginCore\Fields\Field::get('password', $post_id);
 	}
 	
 	// Ensure it's a string and trim

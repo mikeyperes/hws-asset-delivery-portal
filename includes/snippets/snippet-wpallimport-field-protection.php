@@ -92,8 +92,8 @@ function hws_portal_protect_acf_field_on_import($value, $post_id, $name) {
 	// If skipping, return the existing value
 	if ($should_skip) {
 		// Use ACF's get_field for proper value retrieval (handles groups, arrays, etc.)
-		if (function_exists('get_field')) {
-			$existing = \get_field($name, $post_id);
+		if (\Hexa\PluginCore\Fields\Field::available()) {
+			$existing = \Hexa\PluginCore\Fields\Field::get($name, $post_id);
 			if ($existing !== null && $existing !== false) {
 				return $existing;
 			}
@@ -107,8 +107,8 @@ function hws_portal_protect_acf_field_on_import($value, $post_id, $name) {
 		
 		// For nested group fields, try to get from parent
 		// e.g., for "detailed_feedback" in "audit > knowledge_panel" group
-		if (function_exists('get_field')) {
-			$audit = \get_field('audit', $post_id);
+		if (\Hexa\PluginCore\Fields\Field::available()) {
+			$audit = \Hexa\PluginCore\Fields\Field::get('audit', $post_id);
 			if (is_array($audit)) {
 				// Try knowledge_panel group
 				if (isset($audit['knowledge_panel'][$name])) {

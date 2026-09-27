@@ -46,15 +46,15 @@ namespace hws_portal;
 if (!defined('ABSPATH')) { exit; }
 
 function hws_portal_register_snippet_acf_fields_portal_podcast(): void {
-	\add_action('acf/include_fields', __NAMESPACE__ . '\\hws_portal_register_acf_fields_portal_podcast');
+	\hexa_fields_on('include_fields', __NAMESPACE__ . '\\hws_portal_register_acf_fields_portal_podcast');
 }
 
 function hws_portal_register_acf_fields_portal_podcast(): void {
-	if (!function_exists('acf_add_local_field_group')) {
+	if (!\Hexa\PluginCore\Fields\Field::available()) {
 		return;
 	}
 
-	\acf_add_local_field_group(array(
+	\Hexa\PluginCore\Fields\FieldGroups::add(array(
 		'key' => 'group_6936842de2570',
 		'title' => 'Portal - The Michael Peres Podcast',
 		'fields' => array(

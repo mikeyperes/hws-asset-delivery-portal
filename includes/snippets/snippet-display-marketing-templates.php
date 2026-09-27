@@ -34,8 +34,8 @@ function hws_portal_marketing_templates_should_enqueue(): bool {
 
 	// Also enqueue if templates are selected, even if shortcode lives in a theme builder template.
 	$has_templates = false;
-	if (function_exists('get_field')) {
-		$templates = get_field('templates', (int) $post->ID, false);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$templates = \Hexa\PluginCore\Fields\Field::get('templates', (int) $post->ID, false);
 		$has_templates = !empty($templates);
 	}
 
@@ -111,12 +111,12 @@ if (!function_exists(__NAMESPACE__ . '\\hws_portal_display_marketing_templates_s
 		}
 
 		// ACF required.
-		if (!function_exists('get_field')) {
+		if (!\Hexa\PluginCore\Fields\Field::available()) {
 			return '';
 		}
 
 		$post_id   = (int) \get_the_ID();
-		$templates = get_field('templates', $post_id);
+		$templates = \Hexa\PluginCore\Fields\Field::get('templates', $post_id);
 
 		if (empty($templates)) {
 			return '';

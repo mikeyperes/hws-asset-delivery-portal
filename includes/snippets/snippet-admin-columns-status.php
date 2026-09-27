@@ -20,7 +20,7 @@ function hws_portal_register_snippet_admin_columns_status(): void {
 	\add_action('pre_get_posts', __NAMESPACE__ . '\\sort_by_status');
 	
 	// Register a separate field group for Status in side metabox
-	\add_action('acf/include_fields', __NAMESPACE__ . '\\register_status_side_metabox');
+	\hexa_fields_on('include_fields', __NAMESPACE__ . '\\register_status_side_metabox');
 }
 
 /**
@@ -44,8 +44,8 @@ function render_status_column($column, $post_id) {
 	if ($column !== 'portal_status') return;
 	
 	$status = '';
-	if (function_exists('get_field')) {
-		$status = \get_field('status', $post_id);
+	if (\Hexa\PluginCore\Fields\Field::available()) {
+		$status = \Hexa\PluginCore\Fields\Field::get('status', $post_id);
 	}
 	if (empty($status)) {
 		$status = 'pending';
@@ -91,9 +91,9 @@ function sort_by_status($query) {
  * Register Status field in side metabox (separate from main field group)
  */
 function register_status_side_metabox() {
-	if (!function_exists('acf_add_local_field_group')) return;
+	if (!\Hexa\PluginCore\Fields\Field::available()) return;
 	
-	\acf_add_local_field_group(array(
+	\Hexa\PluginCore\Fields\FieldGroups::add(array(
 		'key' => 'group_status_side_metabox',
 		'title' => 'Status',
 		'fields' => array(

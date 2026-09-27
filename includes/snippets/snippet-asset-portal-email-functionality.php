@@ -93,14 +93,14 @@ function asset_portal_get_field_key_for_asset_portal_posttype( $field_name, $pos
 	}
 
 	// 2) Scan ACF field groups for portal CPT.
-	if ( function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' ) ) {
-		$groups = \acf_get_field_groups( array( 'post_type' => HWS_PORTAL_CPT ) );
+	if ( \Hexa\PluginCore\Fields\Field::available() && \Hexa\PluginCore\Fields\Field::available() ) {
+		$groups = \Hexa\PluginCore\Fields\FieldGroups::all( array( 'post_type' => HWS_PORTAL_CPT ) );
 		if ( is_array( $groups ) ) {
 			foreach ( $groups as $group ) {
 				if ( empty( $group['key'] ) ) {
 					continue;
 				}
-				$fields = \acf_get_fields( $group['key'] );
+				$fields = \Hexa\PluginCore\Fields\FieldGroups::fields( $group['key'] );
 				$found  = asset_portal_find_field_key_recursive( $fields, $field_name );
 				if ( $found ) {
 					return $found;
@@ -114,8 +114,8 @@ function asset_portal_get_field_key_for_asset_portal_posttype( $field_name, $pos
 
 function asset_portal_get_history_value( $post_id ) {
 	$val = '';
-	if ( function_exists( 'get_field' ) ) {
-		$val = \get_field( 'history', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$val = \Hexa\PluginCore\Fields\Field::get( 'history', $post_id );
 	}
 	if ( ! is_string( $val ) ) {
 		$val = \get_post_meta( $post_id, 'history', true );
@@ -129,9 +129,9 @@ function asset_portal_set_history_value( $post_id, $new_history ) {
 	$field_key = asset_portal_get_field_key_for_asset_portal_posttype( 'history', $post_id );
 
 	// Prefer update_field with field key if we have it.
-	if ( function_exists( 'update_field' ) ) {
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
 		if ( $field_key ) {
-			$ok = \update_field( $field_key, $new_history, $post_id );
+			$ok = \Hexa\PluginCore\Fields\Field::update( $field_key, $new_history, $post_id );
 			if ( $ok ) {
 				// Keep the reference meta correct too.
 				\update_post_meta( $post_id, '_history', $field_key );
@@ -140,7 +140,7 @@ function asset_portal_set_history_value( $post_id, $new_history ) {
 		}
 
 		// Try name-based as a secondary attempt.
-		$ok = \update_field( 'history', $new_history, $post_id );
+		$ok = \Hexa\PluginCore\Fields\Field::update( 'history', $new_history, $post_id );
 		if ( $ok ) {
 			if ( $field_key ) {
 				\update_post_meta( $post_id, '_history', $field_key );
@@ -188,13 +188,13 @@ function asset_portal_admin_footer_js_for_acf_email() {
 		return;
 	}
 
-	$email_templates = \get_field( 'email_templates', 'option' );
+	$email_templates = \Hexa\PluginCore\Fields\Field::get( 'email_templates', 'option' );
 
 	// ROOT options repeater: contents -> content (wysiwyg)
-	$root_contents = \get_field( 'contents', 'option' );
+	$root_contents = \Hexa\PluginCore\Fields\Field::get( 'contents', 'option' );
 
 	// Get Default Marketing Templates from settings (for auto-import on new posts)
-	$default_marketing_templates = \get_field( 'default_marketing_templates', 'option' );
+	$default_marketing_templates = \Hexa\PluginCore\Fields\Field::get( 'default_marketing_templates', 'option' );
 	$default_templates_data = array();
 	if ( ! empty( $default_marketing_templates ) && is_array( $default_marketing_templates ) ) {
 		foreach ( $default_marketing_templates as $template ) {
@@ -1667,8 +1667,8 @@ function asset_portal_maybe_generate_password_on_meta( $meta_id, $post_id, $meta
 	
 	// Check if password already exists
 	$current = '';
-	if ( function_exists( 'get_field' ) ) {
-		$current = \get_field( 'password', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$current = \Hexa\PluginCore\Fields\Field::get( 'password', $post_id );
 	}
 	if ( ! is_string( $current ) ) {
 		$current = \get_post_meta( $post_id, 'password', true );
@@ -1688,8 +1688,8 @@ function asset_portal_maybe_generate_password_on_meta( $meta_id, $post_id, $meta
 	// Generate password
 	$new_pw = \wp_generate_password( 12, false, false );
 	
-	if ( function_exists( 'update_field' ) ) {
-		\update_field( 'password', $new_pw, $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		\Hexa\PluginCore\Fields\Field::update( 'password', $new_pw, $post_id );
 	} else {
 		\update_post_meta( $post_id, 'password', $new_pw );
 	}
@@ -1715,8 +1715,8 @@ function asset_portal_ensure_password_exists( $post_id, $post, $update ) {
 	}
 
 	$current = '';
-	if ( function_exists( 'get_field' ) ) {
-		$current = \get_field( 'password', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$current = \Hexa\PluginCore\Fields\Field::get( 'password', $post_id );
 	}
 	if ( ! is_string( $current ) ) {
 		$current = \get_post_meta( $post_id, 'password', true );
@@ -1730,8 +1730,8 @@ function asset_portal_ensure_password_exists( $post_id, $post, $update ) {
 	$new_pw = \wp_generate_password( 12, false, false );
 
 	// Write password (prefer ACF if available).
-	if ( function_exists( 'update_field' ) ) {
-		\update_field( 'password', $new_pw, $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		\Hexa\PluginCore\Fields\Field::update( 'password', $new_pw, $post_id );
 	} else {
 		\update_post_meta( $post_id, 'password', $new_pw );
 	}
@@ -1761,8 +1761,8 @@ function asset_portal_generate_search_results_url( $post_id, $post, $update ) {
 
 	// Check if search_results is already set
 	$current = '';
-	if ( function_exists( 'get_field' ) ) {
-		$audit = \get_field( 'audit', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$audit = \Hexa\PluginCore\Fields\Field::get( 'audit', $post_id );
 		if ( is_array( $audit ) && isset( $audit['knowledge_panel'] ) && is_array( $audit['knowledge_panel'] ) ) {
 			$current = $audit['knowledge_panel']['search_results'] ?? '';
 		}
@@ -1785,9 +1785,9 @@ function asset_portal_generate_search_results_url( $post_id, $post, $update ) {
 	$search_url = 'https://seoforpublicfigures.com/google-knowledge-graph-explorer/?s=' . $search_param;
 
 	// Save to ACF field: audit > knowledge_panel > search_results
-	if ( function_exists( 'update_field' ) ) {
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
 		// Get current audit data
-		$audit = \get_field( 'audit', $post_id );
+		$audit = \Hexa\PluginCore\Fields\Field::get( 'audit', $post_id );
 		if ( ! is_array( $audit ) ) {
 			$audit = array();
 		}
@@ -1795,7 +1795,7 @@ function asset_portal_generate_search_results_url( $post_id, $post, $update ) {
 			$audit['knowledge_panel'] = array();
 		}
 		$audit['knowledge_panel']['search_results'] = $search_url;
-		\update_field( 'audit', $audit, $post_id );
+		\Hexa\PluginCore\Fields\Field::update( 'audit', $audit, $post_id );
 	}
 }
 
@@ -1844,7 +1844,7 @@ function asset_portal_process_parameterized_shortcodes( string $content, int $po
 	$content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	
 	// Get audit field data
-	$audit = function_exists( 'get_field' ) ? \get_field( 'audit', $post_id ) : array();
+	$audit = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get( 'audit', $post_id ) : array();
 	
 	// Get example images/URLs from theme options (email_templates.audit)
 	$audit_kp_example_image = '';
@@ -1852,8 +1852,8 @@ function asset_portal_process_parameterized_shortcodes( string $content, int $po
 	$audit_ws_schema_example_url = '';
 	
 	// Get via ACF first
-	if ( function_exists( 'get_field' ) ) {
-		$email_templates = \get_field( 'email_templates', 'option' );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$email_templates = \Hexa\PluginCore\Fields\Field::get( 'email_templates', 'option' );
 		if ( is_array( $email_templates ) && isset( $email_templates['audit'] ) && is_array( $email_templates['audit'] ) ) {
 			$audit_settings = $email_templates['audit'];
 			$audit_kp_example_image = $audit_settings['knowledge_panel_example_image'] ?? '';
@@ -2263,15 +2263,15 @@ function asset_portal_get_shortcode_replacements( $post_id, $data = array() ) {
 
 	// Get deliverables field content
 	$deliverables = '';
-	if ( function_exists( 'get_field' ) ) {
-		$deliverables = \get_field( 'delivertables', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$deliverables = \Hexa\PluginCore\Fields\Field::get( 'delivertables', $post_id );
 		if ( ! $deliverables ) {
 			$deliverables = '';
 		}
 	}
 
 	// Get audit field content - NESTED STRUCTURE
-	$audit = function_exists( 'get_field' ) ? \get_field( 'audit', $post_id ) : array();
+	$audit = \Hexa\PluginCore\Fields\Field::available() ? \Hexa\PluginCore\Fields\Field::get( 'audit', $post_id ) : array();
 	
 	// Knowledge Panel group
 	$audit_kp_report = '';
@@ -2327,13 +2327,13 @@ function asset_portal_get_shortcode_replacements( $post_id, $data = array() ) {
 	$google_sheet_submissions_link = '';
 	
 	// Get via ACF first
-	if ( function_exists( 'get_field' ) ) {
-		$email_templates = \get_field( 'email_templates', 'option' );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$email_templates = \Hexa\PluginCore\Fields\Field::get( 'email_templates', 'option' );
 		if ( is_array( $email_templates ) && isset( $email_templates['audit'] ) && is_array( $email_templates['audit'] ) ) {
 			$audit_ws_schema_example_url = $email_templates['audit']['website_schema_example_url'] ?? '';
 		}
 		// Get settings group for Google Sheet
-		$settings = \get_field( 'settings', 'option' );
+		$settings = \Hexa\PluginCore\Fields\Field::get( 'settings', 'option' );
 		if ( is_array( $settings ) ) {
 			$google_sheet_submissions_url = $settings['google_sheet_submissions'] ?? '';
 		}
@@ -2476,8 +2476,8 @@ function asset_portal_handle_send_email_ajax() {
 
 	// Get deliverables field content
 	$deliverables = '';
-	if ( function_exists( 'get_field' ) ) {
-		$deliverables = \get_field( 'delivertables', $post_id );
+	if ( \Hexa\PluginCore\Fields\Field::available() ) {
+		$deliverables = \Hexa\PluginCore\Fields\Field::get( 'delivertables', $post_id );
 		if ( ! $deliverables ) {
 			$deliverables = '';
 		}
@@ -2616,8 +2616,8 @@ function asset_portal_handle_send_email_ajax() {
 
 	if ( $sent ) {
 		// Update status to 'email_sent' for non-test emails
-		if ( ! $is_test && function_exists( 'update_field' ) ) {
-			\update_field( 'status', 'email_sent', $post_id );
+		if ( ! $is_test && \Hexa\PluginCore\Fields\Field::available() ) {
+			\Hexa\PluginCore\Fields\Field::update( 'status', 'email_sent', $post_id );
 		}
 		
 		// Log to activity log

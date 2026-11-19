@@ -3,7 +3,7 @@
  * Plugin Name: HWS Portal
  * Plugin URI: https://hexawebsystems.com
  * Description: Asset portal management system with email functionality, password protection, marketing templates, and Elementor integrations. Provides admin toggles for modular snippet activation.
- * Version: 1.8.0
+ * Version: 1.8.1
  * Author: Michael Peres - Hexa Web Systems
  * Author URI: https://michaelperes.com
  * Namespace: hws_portal
@@ -16,12 +16,12 @@ if (!defined('ABSPATH')) { exit; }
 // =============================================================================
 // PLUGIN CONSTANTS (static)
 // =============================================================================
-define('HWS_PORTAL_VERSION', '1.8.0');
+define('HWS_PORTAL_VERSION', '1.8.1');
 define('HWS_PORTAL_PATH', plugin_dir_path(__FILE__));
 define('HWS_PORTAL_URL', plugin_dir_url(__FILE__));
 define('HWS_PORTAL_OPTION_KEY', 'hws_portal_settings');
 
-// Hexa WP Core: custom fields run on ACF when it is active and natively when it is not.
+// Portal fields are registered and edited by Hexa WP Core.
 $hexa_plugin_core_root = HWS_PORTAL_PATH . 'lib/hexa-wordpress-plugin-core';
 require_once $hexa_plugin_core_root . '/bootstrap.php';
 \hexa_plugin_core_register_package(
@@ -33,7 +33,7 @@ require_once $hexa_plugin_core_root . '/bootstrap.php';
 );
 
 /**
- * ACF Options Page Slug.
+ * Portal options page slug.
  * This is the menu slug for the theme options page URL.
  * Note: For get_field() calls, always use 'option' - not this slug.
  */
@@ -607,9 +607,9 @@ jQuery(function($){
 	// =========================================================================
 	
 	function hwsFindTemplatesField() {
-		var $f = $('.acf-field[data-key="field_69373d01d65ce"]').first();
+		var $f = $('.hexa-field[data-key="field_69373d01d65ce"]').first();
 		if ($f.length) return $f;
-		return $('.acf-field[data-name="templates"]').first();
+		return $('.hexa-field[data-name="templates"]').first();
 	}
 	
 	function hwsImportTemplates($select, $status) {
@@ -661,7 +661,7 @@ jQuery(function($){
 		var $btn = $('<button type="button" class="button button-secondary">Import Default Templates</button>');
 		var $status = $('<span style="margin-left:10px; display:none;"></span>');
 		$controls.append($btn).append($status);
-		$field.find('.acf-input').append($controls);
+		$field.append($controls);
 		
 		// Button click
 		$btn.on('click', function(e) {
@@ -685,13 +685,7 @@ jQuery(function($){
 		}
 	}
 	
-	// Initialize on ACF ready
-	if (window.acf && typeof acf.add_action === 'function') {
-		acf.add_action('ready', hwsSetupTemplatesButton);
-		acf.add_action('append', hwsSetupTemplatesButton);
-	} else {
-		$(document).ready(hwsSetupTemplatesButton);
-	}
+	hwsSetupTemplatesButton();
 
 	// =========================================================================
 	// AUTO-CHECK DEFAULT TAXONOMY TERM ON NEW POSTS

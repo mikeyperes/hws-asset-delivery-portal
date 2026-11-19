@@ -504,7 +504,21 @@ function asset_portal_admin_footer_js_for_acf_email() {
 
 		jQuery(function($) {
 
-			if (typeof acf === 'undefined') return;
+			// Bug: the portal controls expected ACF's JavaScript field objects.
+			// Fix: bind them to Core's actual inputs. Why: existing options and email actions use the same values.
+			function portalField($field) {
+				const input = () => $field.find('input:not([type=hidden]),textarea,select').first();
+				return {
+					$el: $field,
+					$input: input,
+					$inputWrap: () => $field,
+					get: key => key === 'type' && $field.hasClass('hexa-field-wysiwyg') ? 'wysiwyg' : '',
+					val: function(value) {
+						if (arguments.length) input().val(value).trigger('change');
+						return input().val();
+					}
+				};
+			}
 
 			function assetPortalGetPostId() {
 				var id = $('#post_ID').val();
@@ -514,21 +528,21 @@ function asset_portal_admin_footer_js_for_acf_email() {
 
 			// --- ACF helpers (NAME-based, with group scoping) ---
 			function getFieldByNameRoot(fieldName) {
-				var $el = $('.acf-field[data-name="' + fieldName + '"]').first();
+				var $el = $('.hexa-field[data-name="' + fieldName + '"]').first();
 				if (!$el.length) return null;
-				return acf.getField($el);
+				return portalField($el);
 			}
 
 			function getGroupEl(groupName) {
-				return $('.acf-field[data-name="' + groupName + '"]').first();
+				return $('.hexa-field[data-name="' + groupName + '"]').first();
 			}
 
 			function getFieldInGroup(groupName, subFieldName) {
 				var $group = getGroupEl(groupName);
 				if (!$group.length) return null;
-				var $el = $group.find('.acf-field[data-name="' + subFieldName + '"]').first();
+				var $el = $group.find('.hexa-field[data-name="' + subFieldName + '"]').first();
 				if (!$el.length) return null;
-				return acf.getField($el);
+				return portalField($el);
 			}
 
 			function getWysiwygHtml(fieldObj) {
@@ -583,7 +597,7 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				var $status = $('<span id="asset-portal-send-email-status" style="margin-left:10px;"></span>');
 
 				$controlsWrapper.append($buttonSend).append($buttonTest).append($buttonPreview).append($status);
-				$messageGroup.find('> .acf-input').append($controlsWrapper);
+				$messageGroup.append($controlsWrapper);
 
 				// Preview Email handler
 				$buttonPreview.on('click', function(e) {
@@ -610,9 +624,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 
 					// Collect CC emails from repeater field
 					var ccEmails = [];
-					var $ccField = $('.acf-field[data-name="cc_emails"][data-type="repeater"]').first();
+					var $ccField = $('.hexa-field[data-name="cc_emails"].hexa-field-repeater').first();
 					if ($ccField.length) {
-						$ccField.find('.acf-row:not(.acf-clone)').each(function() {
+						$ccField.find('.hexa-repeater-row').each(function() {
 							var $input = $(this).find('input[type="email"], input[type="text"]').first();
 							if ($input.length) {
 								var email = $input.val();
@@ -727,9 +741,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 
 					// Collect CC emails from repeater field
 					var ccEmails = [];
-					var $ccField = $('.acf-field[data-name="cc_emails"]');
+					var $ccField = $('.hexa-field[data-name="cc_emails"]');
 					if ($ccField.length) {
-						$ccField.find('.acf-row:not(.acf-clone)').each(function() {
+						$ccField.find('.hexa-repeater-row').each(function() {
 							var $input = $(this).find('input[type="email"], input[type="text"]').first();
 							if ($input.length) {
 								var email = $input.val();
@@ -958,13 +972,13 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			 */
 			function assetPortalCreateCCControl() {
 				// Find the CC field wrapper (not inside rows)
-				var $ccField = $('.acf-field[data-name="cc_emails"][data-type="repeater"]').first();
+				var $ccField = $('.hexa-field[data-name="cc_emails"].hexa-field-repeater').first();
 				if (!$ccField.length) {
 					return;
 				}
 
 				// Get the direct .acf-input child (not nested ones inside rows)
-				var $acfInput = $ccField.children('.acf-input');
+				var $acfInput = $ccField;
 				if (!$acfInput.length) {
 					return;
 				}
@@ -999,7 +1013,7 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				var isNewPost = window.location.href.indexOf('post-new.php') !== -1;
 				if (isNewPost && ccEmails.length) {
 					setTimeout(function() {
-						var $existingRows = $ccField.find('.acf-row:not(.acf-clone)');
+						var $existingRows = $ccField.find('.hexa-repeater-row');
 						if ($existingRows.length === 0) {
 							importCCEmails($ccField, ccEmails, null);
 						}
@@ -1020,38 +1034,18 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				if ($status) $status.text('Clearing existing...').css('color', '#666');
 
 				// Get all existing rows (not clone)
-				var $existingRows = $ccField.find('.acf-row:not(.acf-clone)');
+				var $existingRows = $ccField.find('.hexa-repeater-row');
 				var rowCount = $existingRows.length;
 
 				// Function to remove rows one by one, handling confirmation
 				function removeAllRows(callback) {
-					var $rows = $ccField.find('.acf-row:not(.acf-clone)');
+					var $rows = $ccField.find('.hexa-repeater-row');
 					if ($rows.length === 0) {
 						callback();
 						return;
 					}
 
-					// Remove first row - ACF removes without confirmation if we use the acf method
-					var $firstRow = $rows.first();
-					var $removeBtn = $firstRow.find('.acf-icon.-minus').first();
-					
-					if ($removeBtn.length) {
-						// Simulate shift+click to skip confirmation, or just remove directly
-						var field = acf.getField($ccField);
-						if (field && typeof field.remove === 'function') {
-							field.remove($firstRow);
-						} else {
-							// Fallback: trigger click and auto-confirm
-							$removeBtn.trigger('click');
-							// Auto-click Remove in confirmation if it appears
-							setTimeout(function() {
-								var $confirmRemove = $('.acf-fc-popup a[data-event="remove-row"], .acf-actions a:contains("Remove")').first();
-								if ($confirmRemove.length) {
-									$confirmRemove.trigger('click');
-								}
-							}, 50);
-						}
-					}
+					$rows.first().remove();
 
 					// Wait and check again
 					setTimeout(function() {
@@ -1077,14 +1071,14 @@ function asset_portal_admin_footer_js_for_acf_email() {
 						
 						var email = ccEmails[index];
 						// Find add button in the .acf-actions area (bottom of repeater)
-						var $addBtn = $ccField.find('.acf-actions .acf-button[data-event="add-row"]').first();
+						var $addBtn = $ccField.find('.hexa-repeater-add').first();
 						
 						if ($addBtn.length) {
 							$addBtn.trigger('click');
 							
 							// Wait for row to appear
 							setTimeout(function() {
-								var $newRow = $ccField.find('.acf-row:not(.acf-clone)').last();
+								var $newRow = $ccField.find('.hexa-repeater-row').last();
 								var $input = $newRow.find('input[type="email"], input[type="text"]').first();
 								
 								if ($input.length) {
@@ -1136,7 +1130,7 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				if (!isNewPost) return;
 
 				// Find the ACF field wrapper
-				var $field = $('.acf-field[data-name="templates"]');
+				var $field = $('.hexa-field[data-name="templates"]');
 				if (!$field.length) return;
 
 				// Get the actual select element
@@ -1197,14 +1191,14 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				if (!$group.length) return null;
 				
 				// Find the subgroup
-				var $subGroup = $group.find('.acf-field[data-name="' + subGroupName + '"]').first();
+				var $subGroup = $group.find('.hexa-field[data-name="' + subGroupName + '"]').first();
 				if (!$subGroup.length) return null;
 				
 				// Find the field within subgroup
-				var $el = $subGroup.find('.acf-field[data-name="' + fieldName + '"]').first();
+				var $el = $subGroup.find('.hexa-field[data-name="' + fieldName + '"]').first();
 				if (!$el.length) return null;
 				
-				return acf.getField($el);
+				return portalField($el);
 			}
 
 			/**
@@ -1312,14 +1306,14 @@ function asset_portal_admin_footer_js_for_acf_email() {
 					var $hInput = historyField.$input();
 					if ($hInput && $hInput.length) $hInput.attr('readonly', 'readonly');
 				} else {
-					$('.acf-field[data-name="history"] textarea').attr('readonly', 'readonly');
+					$('.hexa-field[data-name="history"] textarea').attr('readonly', 'readonly');
 				}
 
 				if (orderInfoField && typeof orderInfoField.$input === 'function') {
 					var $oInput = orderInfoField.$input();
 					if ($oInput && $oInput.length) $oInput.attr('readonly', 'readonly');
 				} else {
-					$('.acf-field[data-name="order_info"] textarea').attr('readonly', 'readonly');
+					$('.hexa-field[data-name="order_info"] textarea').attr('readonly', 'readonly');
 				}
 			}
 
@@ -1328,7 +1322,7 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			assetPortalMakeHistoryAndOrderInfoReadonly();
 			assetPortalGenerateDynamicUrls();
 
-			acf.addAction('refresh', function () {
+			$(document).on('click', '.hexa-repeater-add, .hexa-repeater-remove', function () {
 				assetPortalInjectSendEmailButton();
 				assetPortalInjectTemplateControls();
 				assetPortalMakeHistoryAndOrderInfoReadonly();
@@ -1468,9 +1462,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			 */
 			function updateKgmidInstructions(field) {
 				if (!field || !field.$el) return;
-				var $instructions = field.$el.find('.acf-label .description');
+				var $instructions = field.$el.children('.description');
 				if (!$instructions.length) {
-					$instructions = field.$el.find('.acf-input .description');
+					$instructions = field.$el.children('.description');
 				}
 				
 				var baseHtml = '<code>[audit_knowledge_panel_kgmid]</code><br><code>[audit_knowledge_panel_kgmid format=&quot;url&quot;]</code> = Full Google URL';
@@ -1494,9 +1488,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			 */
 			function updateUrlFieldInstructions(field, type) {
 				if (!field || !field.$el) return;
-				var $instructions = field.$el.find('.acf-label .description');
+				var $instructions = field.$el.children('.description');
 				if (!$instructions.length) {
-					$instructions = field.$el.find('.acf-input .description');
+					$instructions = field.$el.children('.description');
 				}
 				
 				var shortcode = (type === 'personal') ? 'audit_website_url_personal' : 'audit_website_url_company';
@@ -1518,9 +1512,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			 */
 			function updateImageFieldInstructions(field, shortcode, urlField) {
 				if (!field || !field.$el) return;
-				var $instructions = field.$el.find('.acf-label .description');
+				var $instructions = field.$el.children('.description');
 				if (!$instructions.length) {
-					$instructions = field.$el.find('.acf-input .description');
+					$instructions = field.$el.children('.description');
 				}
 				
 				var baseHtml = '<code>[' + shortcode + ']</code> (default: medium_large, lightbox)<br>';
@@ -1580,9 +1574,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 				}
 				
 				// Update instructions with shortcode and clickable link
-				var $instructions = field.$el.find('.acf-label .description');
+				var $instructions = field.$el.children('.description');
 				if (!$instructions.length) {
-					$instructions = field.$el.find('.acf-input .description');
+					$instructions = field.$el.children('.description');
 				}
 				
 				var baseHtml = '<code>[' + shortcode + ']</code>';
@@ -1600,9 +1594,9 @@ function asset_portal_admin_footer_js_for_acf_email() {
 			 */
 			function updateSearchResultsInstructions(field, postTitle) {
 				if (!field || !field.$el) return;
-				var $instructions = field.$el.find('.acf-label .description');
+				var $instructions = field.$el.children('.description');
 				if (!$instructions.length) {
-					$instructions = field.$el.find('.acf-input .description');
+					$instructions = field.$el.children('.description');
 				}
 				if ($instructions.length && postTitle.trim()) {
 					// Preserve case for display

@@ -72,15 +72,15 @@ function hws_portal_load_enabled_snippets(): void {
 			'fn'   => 'hws_portal_register_snippet_register_taxonomy_portal_type',
 		],
 		'acf_options_page' => [
-			'file' => 'snippet-acf-options-page.php',
+			'file' => 'snippet-options-page.php',
 			'fn'   => 'hws_portal_register_snippet_acf_options_page',
 		],
 		'acf_fields_portal_settings' => [
-			'file' => 'snippet-acf-fields-portal-settings.php',
+			'file' => 'snippet-fields-portal-settings.php',
 			'fn'   => 'hws_portal_register_snippet_acf_fields_portal_settings',
 		],
 		'acf_fields_portal_podcast' => [
-			'file' => 'snippet-acf-fields-portal-podcast.php',
+			'file' => 'snippet-fields-portal-podcast.php',
 			'fn'   => 'hws_portal_register_snippet_acf_fields_portal_podcast',
 		],
 	];

@@ -720,7 +720,7 @@ function asset_portal_admin_footer_js_for_acf_email() {
 					var passwordField = getFieldByNameRoot('password');
 
 					if (!subjectField || !bodyField) {
-						$status.text('Missing required ACF fields (subject, body).').css('color', 'red');
+						$status.text('Missing required fields (subject, body).').css('color', 'red');
 						return;
 					}
 

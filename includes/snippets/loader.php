@@ -2,7 +2,7 @@
 /**
  * Snippet Loader
  * 
- * Loads core snippets (CPT, taxonomy, ACF) first, then enabled optional snippets.
+ * Loads core snippets (CPT, taxonomy, fields) first, then enabled optional snippets.
  * Each snippet file contains its own register function that sets up WordPress hooks.
  */
 
@@ -60,7 +60,7 @@ function hws_portal_load_enabled_snippets(): void {
 	hws_portal_load_snippet_file('snippet-shortcode-utilities.php', 'hws_portal_register_snippet_shortcode_utilities');
 
 	// =========================================================================
-	// CORE SNIPPETS - CPT, taxonomy, ACF structures (check settings)
+	// CORE SNIPPETS - CPT, taxonomy, field structures (check settings)
 	// =========================================================================
 	$core_snippets = [
 		'register_cpt_asset_portal' => [

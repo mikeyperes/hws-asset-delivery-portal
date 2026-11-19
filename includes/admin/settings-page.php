@@ -37,7 +37,7 @@ function hws_portal_register_settings_page(): void {
 }
 
 /**
- * Core ACF snippets definitions - these can be toggled on/off.
+ * Core field snippets definitions - these can be toggled on/off.
  */
 function hws_portal_core_snippet_definitions(): array {
 	return [
@@ -50,11 +50,11 @@ function hws_portal_core_snippet_definitions(): array {
 			'desc'  => 'Hierarchical taxonomy "portal_type" for categorizing portals.',
 		],
 		'acf_options_page' => [
-			'title' => 'ACF Options Page',
+			'title' => 'Field Options Page',
 			'desc'  => 'Options page "Deliverables - Settings" for global settings.',
 		],
 		'acf_fields_portal_settings' => [
-			'title' => 'ACF: Portal Settings',
+			'title' => 'Fields: Portal Settings',
 			'desc'  => <<<HTML
 <details style="margin-top:4px;">
 <summary style="cursor:pointer;color:#2271b1;">View field structure</summary>
@@ -78,7 +78,7 @@ default_marketing_templates (post_object → elementor_library)
 HTML,
 		],
 		'acf_fields_portal_podcast' => [
-			'title' => 'ACF: Portal Podcast Fields',
+			'title' => 'Fields: Portal Podcast Fields',
 			'desc'  => <<<HTML
 <details style="margin-top:4px;">
 <summary style="cursor:pointer;color:#2271b1;">View field structure</summary>
@@ -141,7 +141,7 @@ function hws_portal_snippet_definitions(): array {
 		],
 		'assets_shortcode' => [
 			'title' => 'Marketing Sections Shortcode',
-			'desc'  => 'Shortcode [assets field="..."] for ACF "assets" group.',
+			'desc'  => 'Shortcode [assets field="..."] for the "assets" group.',
 		],
 		'elementor_preview_hide_header_footer' => [
 			'title' => 'Elementor Preview: Hide Header/Footer',
@@ -157,7 +157,7 @@ function hws_portal_snippet_definitions(): array {
 		],
 		'password_protect_portal' => [
 			'title' => 'Password Protect Portal',
-			'desc'  => 'Protects portal pages with ACF "password" field.',
+			'desc'  => 'Protects portal pages with the "password" field.',
 		],
 		'login_email_notifications' => [
 			'title' => 'Login Email Notifications',
@@ -165,7 +165,7 @@ function hws_portal_snippet_definitions(): array {
 		],
 		'wpallimport_field_protection' => [
 			'title' => 'WP All Import Field Protection',
-			'desc'  => 'Protects ACF fields from being overwritten during imports. Use "__SKIP__" or leave blank to keep existing values.',
+			'desc'  => 'Protects fields from being overwritten during imports. Use "__SKIP__" or leave blank to keep existing values.',
 		],
 		'admin_columns_status' => [
 			'title' => 'Admin Columns - Status',
@@ -272,7 +272,7 @@ function hws_portal_render_settings_page(): void {
 			</table>
 
 			<h2 style="margin-top:30px;">Core Components</h2>
-			<p>These register the CPT, taxonomy, and ACF field structures.</p>
+			<p>These register the CPT, taxonomy, and field structures.</p>
 			
 			<table class="widefat striped" style="max-width:1000px;">
 				<thead>
@@ -333,7 +333,7 @@ function hws_portal_render_settings_page(): void {
 		<hr style="margin:30px 0;">
 
 		<h2>Theme Options</h2>
-		<p><a class="button button-secondary" href="<?php echo \esc_url($acf_url); ?>" target="_blank">Open ACF Theme Options</a></p>
+		<p><a class="button button-secondary" href="<?php echo \esc_url($acf_url); ?>" target="_blank">Open Portal Theme Options</a></p>
 
 		<?php if ($gas_code): ?>
 		<hr style="margin:30px 0;">

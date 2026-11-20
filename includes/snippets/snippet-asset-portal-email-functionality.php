@@ -2671,9 +2671,9 @@ function asset_portal_handle_send_email_ajax() {
 			$log_block .= sprintf( "CC: %s\n", implode( ', ', $cc_list ) );
 		}
 		$log_block .= sprintf( "Email Name (Message > Name): %s\n", $email_name_for_log );
-		$log_block .= sprintf( "Recipient Name (ACF): %s\n", $name );
-		$log_block .= sprintf( "Recipient First Name (ACF): %s\n", $first_name );
-		$log_block .= sprintf( "Recipient Last Name (ACF): %s\n", $last_name );
+		$log_block .= sprintf( "Recipient Name (Core field): %s\n", $name );
+		$log_block .= sprintf( "Recipient First Name (Core field): %s\n", $first_name );
+		$log_block .= sprintf( "Recipient Last Name (Core field): %s\n", $last_name );
 		$log_block .= sprintf( "Subject (final): %s\n", $final_subject );
 		$log_block .= sprintf( "Permalink: %s\n", $permalink );
 

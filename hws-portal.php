@@ -3,7 +3,7 @@
  * Plugin Name: HWS Portal
  * Plugin URI: https://hexawebsystems.com
  * Description: Asset portal management system with email functionality, password protection, marketing templates, and Elementor integrations. Provides admin toggles for modular snippet activation.
- * Version: 1.8.2
+ * Version: 1.8.3
  * Author: Michael Peres - Hexa Web Systems
  * Author URI: https://michaelperes.com
  * Namespace: hws_portal
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) { exit; }
 // =============================================================================
 // PLUGIN CONSTANTS (static)
 // =============================================================================
-define('HWS_PORTAL_VERSION', '1.8.2');
+define('HWS_PORTAL_VERSION', '1.8.3');
 define('HWS_PORTAL_PATH', plugin_dir_path(__FILE__));
 define('HWS_PORTAL_URL', plugin_dir_url(__FILE__));
 define('HWS_PORTAL_OPTION_KEY', 'hws_portal_settings');
